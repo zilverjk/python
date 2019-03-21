@@ -1,30 +1,29 @@
 import sys
 
 
-clients = 'pablo,ricardo,'
+clients = ['Pablo', 'Ricardo']
 
 
 def create_client(client_name):
-    global clients #<--"global" coge la variable local para añadirlo dentro de a función
+    global clients  # <--"global" coge la variable local para añadirlo dentro de a función
 
     if client_name not in clients:
-        clients += client_name
-        _add_comma()
+        clients.append(client_name)
     else:
         print('Client already exsits')
 
 
 def list_clients():
-    global clients
-
-    print(clients)
+    for index, client in enumerate(clients):
+        print('{}: {}'.format(index, client))
 
 
 def update_client(client_name, updated_client_name):
     global clients
 
     if client_name in clients:
-        clients = clients.replace(client_name + ',', updated_client_name + ', ')
+        index = clients.index(client_name)
+        clients[index] = updated_client_name
     else:
         _get_validation()
 
@@ -33,25 +32,18 @@ def delete_client(client_name):
     global clients
 
     if client_name in clients:
-        clients = clients.replace(client_name + ',', '')
+        clients.remove(client_name)
     else:
         _get_validation()
 
 
 def search_client(client_name):
-    clients_list = clients.split(',')
 
-    for client in clients_list:
+    for client in clients:
         if client != client_name:
             continue #<----Continue es para que continue a la sieguiente iteración
         else:
             return True
-
-
-def _add_comma():
-    global clients
-
-    clients += ','
 
 
 def _print_welcome():

@@ -1,19 +1,30 @@
 import sys
+import csv
+import os
 
-clients = [
-    {
-        'name': 'Pablo',
-        'company': 'Google',
-        'email': 'pablo@gmail.com',
-        'position': 'Software Engineer'
-    },
-    {
-        'name': 'Ricardo',
-        'company': 'Facebook',
-        'email': 'ricardo@facebook.com',
-        'position': 'Data Engineer'
-    }
-]
+
+CLIENT_TABLE = '.clients.csv'
+CLIENT_SCHEMA = ['name', 'company', 'email', 'position']
+clients = []
+
+
+def _initialize_clients_from_storage():
+    with open(CLIENT_TABLE, mode='r') as f:
+        reader = csv.DictReader(f, fieldnames=CLIENT_SCHEMA)
+
+        for row in reader:
+            clients.append(row)
+
+
+def _save_clients_to_storage():
+    tmp_table_name = '{}.tmp'.format(CLIENT_TABLE)
+    with open(tmp_table_name, mode='w') as f:
+        writer = csv.DictWriter(f, fieldnames=CLIENT_SCHEMA)
+        writer.writerows(clients)
+
+    os.remove(CLIENT_TABLE)
+    os.rename(tmp_table_name, CLIENT_TABLE)
+    print(CLIENT_TABLE)
 
 
 def create_client(client):
@@ -28,11 +39,11 @@ def create_client(client):
 def list_clients():
     for index, client in enumerate(clients):
         print('{uid} | {name} | {company} | {email}| {position}'.format(
-            uid = index,
-            name = client['name'],
-            company = client['company'],
-            email = client['email'],
-            position = client['position']))
+            uid=index,
+            name=client['name'],
+            company=client['company'],
+            email=client['email'],
+            position=client['position']))
 
 
 def update_client(client_name, updated_client_name):
@@ -43,7 +54,6 @@ def update_client(client_name, updated_client_name):
         clients[index_client]['name'] = updated_client_name
     else:
         print('The client {} doesn\'t exists'.format(client_name))
-        
 
 
 def delete_client(client_name):
@@ -82,8 +92,9 @@ def _get_client_field(field_name):
 
 
 def _get_client_name():
-    
-    client_name = None # <-- None significa que no hay ningun valor (como null)
+
+    # <-- None significa que no hay ningun valor (como null)
+    client_name = None
 
     while not client_name:
         client_name = input('What is the client name? ')
@@ -103,6 +114,8 @@ def _get_validation():
 
 
 if __name__ == '__main__':
+    _initialize_clients_from_storage()
+    
     _print_welcome()
 
     command = input()
@@ -116,22 +129,19 @@ if __name__ == '__main__':
             'position': _get_client_field('position'),
         }
         create_client(client)
-        list_clients()
     elif command == 'L':
         list_clients()
     elif command == 'D':
         client_name = _get_client_name()
         delete_client(client_name)
-        list_clients()
     elif command == 'U':
         client_name = _get_client_name()
         updated_client_name = input('What is the new client name? ')
         update_client(client_name, updated_client_name)
-        list_clients()
     elif command == 'S':
         client_name = _get_client_name()
         found = search_client(client_name)
-        
+
         if found is not None:
             print('The client is in the list:')
             print(clients[found])
@@ -139,3 +149,5 @@ if __name__ == '__main__':
             print('The client {} is NOT in the list'.format(client_name))
     else:
         print('Invalid command')
+    
+    _save_clients_to_storage()
